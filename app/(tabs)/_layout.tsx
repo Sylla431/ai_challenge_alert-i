@@ -1,10 +1,11 @@
 import { Platform } from 'react-native';
-import { Tabs, Slot } from 'expo-router';
+import { Tabs, Slot, Redirect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@/constants/Colors';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Fonts } from '@/constants/Typography';
 import { useAppStore } from '@/store/useAppStore';
+import { AuthLoading } from '@/components/auth-loading';
 
 function MobileTabLayout() {
   const insets = useSafeAreaInsets();
@@ -92,6 +93,17 @@ function MobileTabLayout() {
 }
 
 export default function TabLayout() {
+  const session = useAppStore((s) => s.session);
+  const authInitialized = useAppStore((s) => s.authInitialized);
+
+  if (!authInitialized) {
+    return <AuthLoading />;
+  }
+
+  if (!session) {
+    return <Redirect href={'/login' as never} />;
+  }
+
   if (Platform.OS === 'web') {
     return <Slot />;
   }

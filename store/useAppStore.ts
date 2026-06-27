@@ -6,8 +6,10 @@ import type { Profile, ChatMessage, Preferences, AlerteIA } from './types';
 interface AuthSlice {
   session: { user: { id: string; email: string } } | null;
   profile: Profile | null;
+  authInitialized: boolean;
   setSession: (session: { user: { id: string; email: string } } | null) => void;
   setProfile: (profile: Profile | null) => void;
+  setAuthInitialized: (initialized: boolean) => void;
 }
 
 interface ChatSlice {
@@ -38,8 +40,10 @@ export const useAppStore = create<AppStore>()(
       // Auth
       session: null,
       profile: null,
+      authInitialized: false,
       setSession: (session) => set({ session }),
       setProfile: (profile) => set({ profile }),
+      setAuthInitialized: (authInitialized) => set({ authInitialized }),
 
       // Chat
       messages: [],

@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, Redirect } from 'expo-router';
 import { Colors } from '@/constants/Colors';
 import { Fonts } from '@/constants/Typography';
 import { QUARTIERS } from '@/constants/Quartiers';
@@ -23,6 +23,7 @@ import { supabase } from '@/lib/supabase';
 import { withTimeout } from '@/lib/with-timeout';
 import { useAppStore } from '@/store/useAppStore';
 import type { AgentAlerteResponse } from '@/store/types';
+import { AuthLoading } from '@/components/auth-loading';
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
@@ -30,9 +31,14 @@ export default function ProfileScreen() {
   const profile = useAppStore((s) => s.profile);
   const setSession = useAppStore((s) => s.setSession);
   const setProfile = useAppStore((s) => s.setProfile);
+  const authInitialized = useAppStore((s) => s.authInitialized);
+
+  if (!authInitialized) {
+    return <AuthLoading />;
+  }
 
   if (!session) {
-    return <AuthScreen insets={insets} />;
+    return <Redirect href={'/login' as never} />;
   }
 
   return (
@@ -417,101 +423,6 @@ const testStyles = StyleSheet.create({
   },
 });
 
-// === AUTH SCREEN ===
-function AuthScreen({ insets }: { insets: { top: number; bottom: number } }) {
-  const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const handleAuth = useCallback(async () => {
-    if (!email.trim() || !password.trim()) {
-      Alert.alert('Champs requis', 'Veuillez remplir tous les champs.');
-      return;
-    }
-
-    try {
-      setLoading(true);
-      if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.auth.signUp({ email: email.trim(), password });
-        if (error) throw error;
-        Alert.alert('Compte cree', 'Votre compte a ete cree avec succes.');
-      }
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Erreur d\'authentification';
-      Alert.alert('Erreur', message);
-    } finally {
-      setLoading(false);
-    }
-  }, [email, password, isLogin]);
-
-  return (
-    <ScrollView
-      contentContainerStyle={[styles.authContainer, { paddingTop: 24 }]}
-      keyboardShouldPersistTaps="handled"
-    >
-      <View style={styles.authHeader}>
-        <View style={styles.authIcon}>
-          <Ionicons name="water" size={36} color={Colors.primary} />
-        </View>
-        <Text style={styles.authTitle}>Alert{"'"}i Communaute</Text>
-        <Text style={styles.authSubtitle}>
-          {isLogin ? 'Connectez-vous pour contribuer' : 'Creez votre compte'}
-        </Text>
-      </View>
-
-      <View style={styles.authForm}>
-        <Text style={styles.authLabel}>Email</Text>
-        <TextInput
-          style={styles.authInput}
-          placeholder="votre@email.com"
-          placeholderTextColor={Colors.textTertiary}
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          autoComplete="email"
-        />
-
-        <Text style={styles.authLabel}>Mot de passe</Text>
-        <TextInput
-          style={styles.authInput}
-          placeholder="Votre mot de passe"
-          placeholderTextColor={Colors.textTertiary}
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          autoComplete="password"
-        />
-
-        <TouchableOpacity
-          style={[styles.authButton, loading && { opacity: 0.6 }]}
-          onPress={handleAuth}
-          disabled={loading}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.authButtonText}>
-            {loading ? 'Chargement...' : isLogin ? 'Se connecter' : 'Creer un compte'}
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.authToggle}
-          onPress={() => setIsLogin(!isLogin)}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.authToggleText}>
-            {isLogin ? 'Pas de compte ? Inscrivez-vous' : 'Deja un compte ? Connectez-vous'}
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
-  );
-}
-
 // === PROFILE VIEW ===
 function ProfileView({
   session,
@@ -617,7 +528,8 @@ function ProfileView({
     await supabase.auth.signOut();
     setSession(null);
     setProfile(null);
-  }, [setSession, setProfile]);
+    router.replace('/login' as never);
+  }, [setSession, setProfile, router]);
 
   return (
     <ScrollView
@@ -792,75 +704,6 @@ function ProfileView({
 }
 
 const styles = StyleSheet.create({
-  // Auth styles
-  authContainer: {
-    flexGrow: 1,
-    backgroundColor: Colors.background,
-    padding: 24,
-    justifyContent: 'center',
-  },
-  authHeader: {
-    alignItems: 'center',
-    gap: 10,
-    marginBottom: 32,
-  },
-  authIcon: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: `${Colors.primary}12`,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  authTitle: {
-    fontFamily: Fonts.bold,
-    fontSize: 22,
-    color: Colors.text,
-  },
-  authSubtitle: {
-    fontFamily: Fonts.regular,
-    fontSize: 14,
-    color: Colors.textSecondary,
-  },
-  authForm: {
-    gap: 12,
-  },
-  authLabel: {
-    fontFamily: Fonts.medium,
-    fontSize: 13,
-    color: Colors.text,
-  },
-  authInput: {
-    backgroundColor: Colors.white,
-    borderRadius: 12,
-    padding: 14,
-    fontFamily: Fonts.regular,
-    fontSize: 15,
-    color: Colors.text,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  authButton: {
-    backgroundColor: Colors.primary,
-    padding: 16,
-    borderRadius: 14,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  authButtonText: {
-    fontFamily: Fonts.semiBold,
-    fontSize: 16,
-    color: Colors.white,
-  },
-  authToggle: {
-    alignItems: 'center',
-    padding: 12,
-  },
-  authToggleText: {
-    fontFamily: Fonts.medium,
-    fontSize: 14,
-    color: Colors.primary,
-  },
   // Profile styles
   profileContainer: {
     padding: 20,

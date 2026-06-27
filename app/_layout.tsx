@@ -1,5 +1,5 @@
 import { Platform } from 'react-native';
-import { Stack } from 'expo-router';
+import { Stack, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import { View } from 'react-native';
@@ -12,6 +12,8 @@ import { supabase } from '@/lib/supabase';
 import { useAppStore } from '@/store/useAppStore';
 import { AlerteBanner } from '@/components/alerte-banner';
 import { AdminShell } from '@/components/admin/admin-shell';
+import { AuthRedirect } from '@/components/auth-redirect';
+import { AuthLoading } from '@/components/auth-loading';
 import { useAlertesRealtime } from '@/hooks/use-alertes-realtime';
 
 SplashScreen.preventAutoHideAsync();
@@ -25,6 +27,11 @@ export default function RootLayout() {
   const [loaded, error] = useFonts(FontMap);
   const setSession = useAppStore((s) => s.setSession);
   const setProfile = useAppStore((s) => s.setProfile);
+  const setAuthInitialized = useAppStore((s) => s.setAuthInitialized);
+  const session = useAppStore((s) => s.session);
+  const authInitialized = useAppStore((s) => s.authInitialized);
+  const segments = useSegments();
+  const onLoginRoute = (segments as string[]).includes('login');
 
   useEffect(() => {
     if (loaded || error) {
@@ -57,6 +64,9 @@ export default function RootLayout() {
       })
       .catch(() => {
         // Auth session fetch failed (timeout or network) — non-critical at startup
+      })
+      .finally(() => {
+        setAuthInitialized(true);
       });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -70,14 +80,25 @@ export default function RootLayout() {
     });
 
     return () => subscription.unsubscribe();
-  }, [setSession, setProfile]);
+  }, [setSession, setProfile, setAuthInitialized]);
 
   if (!loaded && !error) {
     return null;
   }
 
+  if (!authInitialized) {
+    return (
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaProvider>
+          <AuthLoading />
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
+    );
+  }
+
   const navigation = (
     <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="login" options={{ headerShown: false }} />
       <Stack.Screen name="(tabs)" />
       <Stack.Screen
         name="gov-dashboard"
@@ -95,14 +116,17 @@ export default function RootLayout() {
     </Stack>
   );
 
+  const showAdminShell = Platform.OS === 'web' && session && !onLoginRoute;
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <AlertesRealtimeProvider>
           <View style={{ flex: 1 }}>
             <StatusBar style="dark" />
-            {Platform.OS === 'web' ? <AdminShell>{navigation}</AdminShell> : navigation}
-            <AlerteBanner />
+            <AuthRedirect />
+            {showAdminShell ? <AdminShell>{navigation}</AdminShell> : navigation}
+            {session ? <AlerteBanner /> : null}
           </View>
         </AlertesRealtimeProvider>
       </SafeAreaProvider>

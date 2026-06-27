@@ -22,7 +22,7 @@ export function AuthRequiredModal({ visible, onDismiss }: AuthRequiredModalProps
 
   const handleGoToLogin = useCallback(() => {
     onDismiss();
-    router.push('/(tabs)/profile');
+    router.push('/login' as never);
   }, [onDismiss, router]);
 
   return (
