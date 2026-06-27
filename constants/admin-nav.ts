@@ -1,5 +1,6 @@
 import type { ComponentProps } from 'react';
 import type { Ionicons } from '@expo/vector-icons';
+import { APP_NAME } from '@/constants/Brand';
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
 
@@ -71,7 +72,7 @@ export const ADMIN_SECONDARY_NAV: AdminNavItem[] = [
 export function getAdminPageTitle(pathname: string): string {
   const all = [...ADMIN_NAV_ITEMS, ...ADMIN_SECONDARY_NAV];
   const match = all.find((item) => pathname.includes(item.segment));
-  return match?.label ?? 'Inondalert';
+  return match?.label ?? APP_NAME;
 }
 
 export function isNavItemActive(pathname: string, segment: string): boolean {

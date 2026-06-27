@@ -13,6 +13,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@/constants/Colors';
 import { Fonts } from '@/constants/Typography';
+import { AppLogo } from '@/components/app-logo';
 import { supabase } from '@/lib/supabase';
 
 interface AuthScreenProps {
@@ -120,10 +121,7 @@ export function AuthScreen({
     >
       <View style={styles.card}>
         <View style={styles.header}>
-          <View style={styles.icon}>
-            <Ionicons name="water" size={36} color={Colors.primary} />
-          </View>
-          <Text style={styles.title}>Inondalert</Text>
+          <AppLogo variant="auth" />
           <Text style={styles.subtitle}>
             {isLogin ? subtitle : 'Créez votre compte citoyen'}
           </Text>
@@ -271,20 +269,7 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    gap: 10,
-  },
-  icon: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: `${Colors.primary}12`,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  title: {
-    fontFamily: Fonts.bold,
-    fontSize: 24,
-    color: Colors.text,
+    gap: 14,
   },
   subtitle: {
     fontFamily: Fonts.regular,

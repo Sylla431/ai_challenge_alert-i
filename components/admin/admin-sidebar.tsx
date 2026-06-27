@@ -10,6 +10,7 @@ import {
 } from '@/constants/admin-nav';
 import { Fonts } from '@/constants/Typography';
 import { Colors } from '@/constants/Colors';
+import { AppLogo } from '@/components/app-logo';
 import { useAppStore } from '@/store/useAppStore';
 
 interface AdminSidebarProps {
@@ -75,13 +76,8 @@ export function AdminSidebar({ onNavigate }: AdminSidebarProps) {
   return (
     <View style={styles.sidebar}>
       <View style={styles.brand}>
-        <View style={styles.brandIcon}>
-          <Ionicons name="water" size={22} color={Colors.white} />
-        </View>
-        <View style={styles.brandText}>
-          <Text style={styles.brandTitle}>Inondalert</Text>
-          <Text style={styles.brandSubtitle}>Centre de supervision</Text>
-        </View>
+        <AppLogo variant="sidebar" />
+        <Text style={styles.brandSubtitle}>Centre de supervision</Text>
       </View>
 
       <View style={styles.institution}>
@@ -139,30 +135,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   brand: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
     marginBottom: 20,
-    paddingHorizontal: 4,
-  },
-  brandIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: DashboardColors.accent,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  brandTitle: {
-    fontFamily: Fonts.bold,
-    fontSize: 18,
-    color: Colors.white,
+    gap: 10,
   },
   brandSubtitle: {
     fontFamily: Fonts.regular,
     fontSize: 12,
     color: DashboardColors.sidebarText,
     marginTop: 2,
+    paddingHorizontal: 4,
   },
   institution: {
     paddingHorizontal: 4,

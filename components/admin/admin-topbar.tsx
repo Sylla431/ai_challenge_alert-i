@@ -3,6 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { usePathname, useRouter } from 'expo-router';
 import { DashboardColors } from '@/constants/Dashboard';
 import { getAdminPageTitle } from '@/constants/admin-nav';
+import { APP_TAGLINE } from '@/constants/Brand';
 import { Fonts } from '@/constants/Typography';
 import { Colors } from '@/constants/Colors';
 import { useAppStore } from '@/store/useAppStore';
@@ -28,7 +29,7 @@ export function AdminTopbar({ onMenuPress, showMenu }: AdminTopbarProps) {
         ) : null}
         <View>
           <Text style={styles.title}>{title}</Text>
-          <Text style={styles.subtitle}>Plateforme de vigilance inondations — Bamako</Text>
+          <Text style={styles.subtitle}>{APP_TAGLINE} — Bamako</Text>
         </View>
       </View>
 
