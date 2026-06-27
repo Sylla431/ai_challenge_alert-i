@@ -36,8 +36,7 @@
       ]
     ],
     "experiments": {
-      "typedRoutes": true,
-      "baseUrl": "/30f0a2de-a097-4e07-ae9b-ac5b3ec45aaf/36e19af620e80666/"
+      "typedRoutes": true
     }
   }
 }
